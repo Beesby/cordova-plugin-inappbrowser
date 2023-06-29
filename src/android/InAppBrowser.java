@@ -1036,11 +1036,22 @@ public class InAppBrowser extends CordovaPlugin {
         return "";
     }
 
-    private File createImageFile() throws IOException{
+	private File createImageFile() throws IOException{
         @SuppressLint("SimpleDateFormat") String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "img_"+timeStamp+"_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        return File.createTempFile(imageFileName,".jpg",storageDir);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // let's use the new api for accessing external storage on 29 onwards
+            File storageDir = this.cordova.getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File file = new File(storageDir, imageFileName + ".jpg");
+            return file;
+        } else {
+            // was working well on older droids so let's leave it as is.
+            File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            File file =  File.createTempFile(imageFileName,".jpg",storageDir);
+            return file;
+        }
+
+
     }
     /**
      * Create a new plugin success result and send it back to JavaScript
